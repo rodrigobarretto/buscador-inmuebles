@@ -7,6 +7,7 @@ Escribe data/oportunidades.json y data/historial.json.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -24,6 +25,8 @@ RAIZ = AQUI.parent
 DATA = RAIZ / "data"
 FUENTES = {"mercadolibre": mercadolibre, "argenprop": argenprop, "zonaprop": zonaprop}
 ART = timezone(timedelta(hours=-3))
+# Avisos que no son vivienda aunque aparezcan en la categoría departamentos/casas
+NO_VIVIENDA = re.compile(r"\b(oficina|consultorio|local comercial|cochera|galp[oó]n|dep[oó]sito|terreno|lote)\b", re.I)
 
 
 def log(msg: str) -> None:
@@ -66,7 +69,7 @@ def main() -> None:
         estado[modulo.NOMBRE]["segundos"] = round(time.time() - t0)
 
     log(f"Total crudo: {len(todos)}")
-    todos = [a for a in todos if a.dueno_directo]
+    todos = [a for a in todos if a.dueno_directo and not NO_VIVIENDA.search(a.titulo)]
     todos = puntaje.deduplicar(todos)
     log(f"Dueño directo y sin duplicados: {len(todos)}")
 
