@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/android/
+app/ios/
+app/web/
+*.apk
+
+# El keystore de app/firma/ SÍ se sube a propósito: mantiene la misma firma entre compilaciones.

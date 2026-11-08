@@ -1,0 +1,21 @@
+{
+  "_ayuda": "Configuración del buscador. Podés editar este archivo desde GitHub (botón del lápiz). Los filtros finos (precio, ambientes, barrio) se aplican en la app; acá se define QUÉ se recorre cada día.",
+  "operaciones": ["alquiler", "venta"],
+  "tipos": ["departamentos", "casas", "ph"],
+  "zonas": [
+    {"nombre": "CABA",       "mercadolibre": "capital-federal", "argenprop": "capital-federal", "zonaprop": "capital-federal"},
+    {"nombre": "GBA Norte",  "mercadolibre": "bsas-gba-norte",  "argenprop": "gba-norte",       "zonaprop": "gba-norte"},
+    {"nombre": "GBA Oeste",  "mercadolibre": "bsas-gba-oeste",  "argenprop": "gba-oeste",       "zonaprop": "gba-oeste"},
+    {"nombre": "GBA Sur",    "mercadolibre": "bsas-gba-sur",    "argenprop": "gba-sur",         "zonaprop": "gba-sur"}
+  ],
+  "fuentes": {
+    "mercadolibre": {"activa": true, "paginas": 3},
+    "argenprop":    {"activa": true, "paginas": 3},
+    "zonaprop":     {"activa": true, "paginas": 2}
+  },
+  "pausa_segundos": [2.0, 4.5],
+  "dias_historial": 30,
+  "max_resultados": 1500,
+  "aviso_top": 8,
+  "puntaje_minimo_aviso": 60
+}
