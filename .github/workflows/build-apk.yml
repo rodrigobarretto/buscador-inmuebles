@@ -48,6 +48,7 @@ jobs:
       - name: Compilar
         run: |
           flutter pub get
+          dart run flutter_launcher_icons
           flutter build apk --release --target-platform android-arm64 --dart-define=REPO=${{ github.repository }} --build-number=${{ github.run_number }}
           cp build/app/outputs/flutter-apk/app-release.apk ../buscador-inmuebles.apk
 

@@ -7,9 +7,10 @@ import '../servicio.dart';
 import '../widgets/tarjeta_aviso.dart';
 
 class PantallaDetalle extends StatefulWidget {
-  const PantallaDetalle({super.key, required this.aviso, required this.servicio});
+  const PantallaDetalle({super.key, required this.aviso, required this.servicio, required this.todos});
   final Aviso aviso;
   final Servicio servicio;
+  final List<Aviso> todos;
 
   @override
   State<PantallaDetalle> createState() => _PantallaDetalleState();
@@ -44,6 +45,41 @@ class _PantallaDetalleState extends State<PantallaDetalle> {
         title: Text(etiqueta),
         trailing: Text(valor, style: const TextStyle(fontWeight: FontWeight.w600)),
       );
+
+  Widget _comparacion() {
+    final ref = referenciaBarrio(a, widget.todos);
+    if (ref == null) return const SizedBox.shrink();
+    final tema = Theme.of(context);
+    final tope = (ref.valor > ref.mediana ? ref.valor : ref.mediana) * 1.12;
+    final mejor = ref.valor <= ref.mediana;
+    Widget barra(String etiqueta, double v, Color color) => Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Expanded(child: Text(etiqueta, style: tema.textTheme.bodyMedium)),
+              Text('${formatoPrecio(v, a.moneda)}/m²', style: const TextStyle(fontWeight: FontWeight.w700)),
+            ]),
+            const SizedBox(height: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: LinearProgressIndicator(
+                value: v / tope,
+                minHeight: 10,
+                color: color,
+                backgroundColor: tema.colorScheme.surfaceContainerHighest,
+              ),
+            ),
+          ]),
+        );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Precio por m² frente al barrio', style: tema.textTheme.titleSmall),
+        barra('Este aviso', ref.valor, mejor ? const Color(0xFF1E8E3E) : const Color(0xFFB4471F)),
+        barra('Mediana en ${ref.donde} (${ref.cantidad} avisos)', ref.mediana, tema.colorScheme.outline),
+      ]),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +146,7 @@ class _PantallaDetalleState extends State<PantallaDetalle> {
                 ),
               ),
             ),
+          _comparacion(),
           const SizedBox(height: 8),
           _dato(Icons.home_work_outlined, 'Tipo', a.tipoLegible),
           if (a.ambientes != null) _dato(Icons.meeting_room_outlined, 'Ambientes', '${a.ambientes}'),

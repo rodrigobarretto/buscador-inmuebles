@@ -227,3 +227,55 @@ String formatoPrecio(double? v, String? moneda) {
   }
   return '${moneda == 'USD' ? 'US\$' : '\$'} $b';
 }
+
+int _cmpNulos(double? x, double? y) {
+  if (x == null && y == null) return 0;
+  if (x == null) return 1;
+  if (y == null) return -1;
+  return x.compareTo(y);
+}
+
+/// Aplica los filtros de una operación, saca los ocultos y ordena.
+List<Aviso> filtrarYOrdenar(List<Aviso> todos, String operacion, Filtros f, Set<String> ocultos) {
+  final l = todos.where((a) => a.operacion == operacion && !ocultos.contains(a.id) && f.cumple(a)).toList();
+  switch (f.orden) {
+    case Orden.puntaje:
+      l.sort((a, b) => b.puntaje.compareTo(a.puntaje));
+    case Orden.precio:
+      l.sort((a, b) => _cmpNulos(a.precio, b.precio));
+    case Orden.precioM2:
+      l.sort((a, b) => _cmpNulos(a.precioM2, b.precioM2));
+    case Orden.recientes:
+      l.sort((a, b) {
+        final c = b.primeraVez.compareTo(a.primeraVez);
+        return c != 0 ? c : b.puntaje.compareTo(a.puntaje);
+      });
+  }
+  return l;
+}
+
+class Referencia {
+  final double valor;
+  final double mediana;
+  final String donde;
+  final int cantidad;
+  Referencia(this.valor, this.mediana, this.donde, this.cantidad);
+}
+
+double _mediana(List<double> xs) {
+  final s = [...xs]..sort();
+  final m = s.length ~/ 2;
+  return s.length.isOdd ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+/// Precio por m² del aviso frente a la mediana de su barrio (o de su zona si hay pocos avisos).
+Referencia? referenciaBarrio(Aviso a, List<Aviso> todos) {
+  final v = a.precioM2;
+  if (v == null) return null;
+  final base = todos.where((x) => x.operacion == a.operacion && x.moneda == a.moneda && x.precioM2 != null);
+  final barrio = base.where((x) => a.barrio.isNotEmpty && x.barrio == a.barrio).map((x) => x.precioM2!).toList();
+  if (barrio.length >= 4) return Referencia(v, _mediana(barrio), a.barrio, barrio.length);
+  final zona = base.where((x) => x.zona == a.zona).map((x) => x.precioM2!).toList();
+  if (zona.length >= 4) return Referencia(v, _mediana(zona), a.zona, zona.length);
+  return null;
+}

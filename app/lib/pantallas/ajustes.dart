@@ -35,6 +35,30 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
     if (!ok) await Clipboard.setData(ClipboardData(text: topic));
   }
 
+  Widget _vistaNotificacion(ThemeData tema) {
+    final nuevos = (widget.datos?.avisos ?? <Aviso>[]).where((a) => a.nuevo && a.puntaje >= 60).toList()
+      ..sort((a, b) => b.puntaje.compareTo(a.puntaje));
+    final lineas = nuevos.take(4).map((a) {
+      final op = a.operacion == 'venta' ? 'Vta' : 'Alq';
+      final amb = a.ambientes != null ? '${a.ambientes} amb · ' : '';
+      return '⭐${a.puntaje.round()} $op ${formatoPrecio(a.precio, a.moneda)} · $amb${a.barrio.isNotEmpty ? a.barrio : a.zona}';
+    }).toList();
+    if (nuevos.length > 4) lineas.add('… y ${nuevos.length - 4} más en la app');
+    return Card(
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: tema.colorScheme.primary,
+          child: Icon(Icons.home_outlined, color: tema.colorScheme.onPrimary),
+        ),
+        title: Text('${nuevos.length} oportunidades nuevas de dueño directo',
+            style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text(lineas.isEmpty ? 'Hoy no hubo avisos nuevos por encima de 60 puntos' : lineas.join('\n')),
+        isThreeLine: lineas.length > 1,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
@@ -63,7 +87,9 @@ class _PantallaAjustesState extends State<PantallaAjustes> {
           ),
           const SizedBox(height: 24),
           Text('Notificación diaria', style: tema.textTheme.titleMedium),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
+          _vistaNotificacion(tema),
+          const SizedBox(height: 10),
           const Text(
             '1. Instalá la app gratuita "ntfy" desde Play Store.\n'
             '2. Suscribite al mismo tema que cargaste como secreto NTFY_TOPIC en GitHub.\n'

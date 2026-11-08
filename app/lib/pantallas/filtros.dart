@@ -2,21 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../modelo.dart';
 
-Future<Filtros?> mostrarFiltros(BuildContext context, Filtros f, String operacion, List<String> zonas) {
+Future<Filtros?> mostrarFiltros(
+  BuildContext context, {
+  required Filtros filtros,
+  required String operacion,
+  required List<String> zonas,
+  required List<Aviso> avisos,
+  required Set<String> ocultos,
+}) {
   return showModalBottomSheet<Filtros>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
-    builder: (_) => _HojaFiltros(filtros: f, operacion: operacion, zonas: zonas),
+    builder: (_) => _HojaFiltros(
+        filtros: filtros, operacion: operacion, zonas: zonas, avisos: avisos, ocultos: ocultos),
   );
 }
 
 class _HojaFiltros extends StatefulWidget {
-  const _HojaFiltros({required this.filtros, required this.operacion, required this.zonas});
+  const _HojaFiltros({
+    required this.filtros,
+    required this.operacion,
+    required this.zonas,
+    required this.avisos,
+    required this.ocultos,
+  });
   final Filtros filtros;
   final String operacion;
   final List<String> zonas;
+  final List<Aviso> avisos;
+  final Set<String> ocultos;
 
   @override
   State<_HojaFiltros> createState() => _HojaFiltrosState();
@@ -44,12 +60,23 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
     super.dispose();
   }
 
-  void _aplicar() {
+  void _leerCampos() {
     f
       ..precioMin = _num(_min.text)
       ..precioMax = _num(_max.text)
       ..m2Min = _num(_m2.text)
       ..barrio = _barrio.text.trim();
+  }
+
+  int get _resultados {
+    _leerCampos();
+    return widget.avisos
+        .where((a) => a.operacion == widget.operacion && !widget.ocultos.contains(a.id) && f.cumple(a))
+        .length;
+  }
+
+  void _aplicar() {
+    _leerCampos();
     Navigator.pop(context, f);
   }
 
@@ -97,6 +124,7 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                   const SizedBox(height: 10),
                   TextField(
                     controller: _barrio,
+                    onChanged: (_) => setState(() {}),
                     decoration: const InputDecoration(
                       labelText: 'Barrio o localidad (opcional)',
                       hintText: 'Ej: Caballito, Ramos Mejía',
@@ -128,6 +156,7 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                     Expanded(
                       child: TextField(
                         controller: _min,
+                        onChanged: (_) => setState(() {}),
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(labelText: 'Desde', border: OutlineInputBorder(), isDense: true),
                       ),
@@ -136,6 +165,7 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                     Expanded(
                       child: TextField(
                         controller: _max,
+                        onChanged: (_) => setState(() {}),
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(labelText: 'Hasta', border: OutlineInputBorder(), isDense: true),
                       ),
@@ -159,6 +189,7 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: _m2,
+                    onChanged: (_) => setState(() {}),
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                         labelText: 'Superficie mínima (m²)', border: OutlineInputBorder(), isDense: true),
@@ -187,11 +218,27 @@ class _HojaFiltrosState extends State<_HojaFiltros> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                 child: Row(children: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context, Filtros.porDefecto(widget.operacion)),
+                    onPressed: () {
+                      final orden = f.orden;
+                      setState(() {
+                        f = Filtros.porDefecto(widget.operacion)..orden = orden;
+                        _min.clear();
+                        _max.clear();
+                        _m2.clear();
+                        _barrio.clear();
+                      });
+                    },
                     child: const Text('Limpiar'),
                   ),
                   const Spacer(),
-                  FilledButton.icon(onPressed: _aplicar, icon: const Icon(Icons.check), label: const Text('Aplicar')),
+                  FilledButton.icon(
+                    onPressed: _aplicar,
+                    icon: const Icon(Icons.check),
+                    label: Builder(builder: (_) {
+                      final n = _resultados;
+                      return Text('Ver $n resultado${n == 1 ? '' : 's'}');
+                    }),
+                  ),
                 ]),
               ),
             ),
