@@ -1,6 +1,6 @@
 {
  "generado": "2026-11-13T14:58:43.926253-03:00",
- "ultimo_intento": "2026-11-13T14:58:43.926253-03:00",
+ "ultimo_intento": "2026-11-14T13:41:21.413688-03:00",
  "total": 1066,
  "nuevos": 430,
  "estado_fuentes": {
@@ -8,19 +8,19 @@
    "ok": false,
    "cantidad": 0,
    "error": "Sin resultados (¿bloqueo o cambió el sitio?)",
-   "segundos": 93
+   "segundos": 88
   },
   "Argenprop": {
    "ok": false,
    "cantidad": 0,
    "error": "Sin resultados (¿bloqueo o cambió el sitio?)",
-   "segundos": 332
+   "segundos": 333
   },
   "Zonaprop": {
-   "ok": true,
-   "cantidad": 1224,
-   "error": "",
-   "segundos": 224
+   "ok": false,
+   "cantidad": 0,
+   "error": "Sin resultados (¿bloqueo o cambió el sitio?)",
+   "segundos": 30
   }
  },
  "medianas": {
